@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+monitoring:
+  simulation-mode: true
+  timeout-millis: 1000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
