@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import ru.example.networkmonitoring.exception.BadRequestException;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
@@ -20,6 +21,12 @@ public class RestExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException ex, HttpServletRequest request) {
         Map<String, Object> body = basicBody(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
+        Map<String, Object> body = basicBody(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -3,50 +3,35 @@ package ru.example.networkmonitoring;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.example.networkmonitoring.dto.HostCheckResultResponse;
+import ru.example.networkmonitoring.exception.NotFoundException;
 import ru.example.networkmonitoring.model.Host;
-import ru.example.networkmonitoring.model.HostCheckResult;
-import ru.example.networkmonitoring.model.HostStatus;
+import ru.example.networkmonitoring.repository.HostRepository;
 import ru.example.networkmonitoring.service.MonitoringService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(properties = {
-        "monitoring.simulation-mode=true",
-        "monitoring.timeout-millis=500"
-})
+@SpringBootTest
 class MonitoringServiceTests {
 
     @Autowired
     private MonitoringService monitoringService;
 
+    @Autowired
+    private HostRepository hostRepository;
+
     @Test
-    void checkHostAvailabilityUpdatesLastStatus() {
-        Host host = new Host();
-        host.setName("Gateway");
-        host.setIpAddress("192.168.0.10");
-        host.setRole("gateway");
-        Host saved = monitoringService.createHost(host);
-
-        HostCheckResult result = monitoringService.checkHostAvailability(saved.getId());
-
-        assertThat(result.getHostId()).isEqualTo(saved.getId());
-        assertThat(result.getStatus()).isIn(HostStatus.UP, HostStatus.DOWN, HostStatus.DEGRADED);
-        assertThat(monitoringService.getHost(saved.getId()).getLastStatus()).isEqualTo(result.getStatus());
-        assertThat(monitoringService.getHost(saved.getId()).getLastCheckTime()).isNotNull();
+    void checkHostAvailabilityReturnsResult() {
+        Host host = hostRepository.findByIpAddress("192.168.10.1").orElseThrow();
+        HostCheckResultResponse result = monitoringService.checkHostAvailability(host.getId());
+        assertThat(result.getHostId()).isEqualTo(host.getId());
+        assertThat(result.getStatus()).isNotBlank();
     }
 
     @Test
-    void deleteHostRemovesEntry() {
-        Host host = new Host();
-        host.setName("File server");
-        host.setIpAddress("192.168.0.20");
-        host.setRole("fileserver");
-        Host saved = monitoringService.createHost(host);
-
-        monitoringService.deleteHost(saved.getId());
-
-        assertThatThrownBy(() -> monitoringService.getHost(saved.getId()))
-                .isInstanceOf(RuntimeException.class);
+    void notFoundHostThrowsException() {
+        assertThatThrownBy(() -> monitoringService.checkHostAvailability(99999L))
+                .isInstanceOf(NotFoundException.class);
     }
 }

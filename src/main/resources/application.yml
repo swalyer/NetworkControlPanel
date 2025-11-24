@@ -1,12 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/network_monitoring
+    username: network_monitoring
+    password: network_monitoring
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+flyway:
+  enabled: true
+
 server:
   port: 8080
 
 monitoring:
   simulation-mode: true
   timeout-millis: 1000
+  scheduling:
+    enabled: true
+    fixed-delay-millis: 60000
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

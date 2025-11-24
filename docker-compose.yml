@@ -1,10 +1,28 @@
 version: '3.8'
 services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: network_monitoring
+      POSTGRES_USER: network_monitoring
+      POSTGRES_PASSWORD: network_monitoring
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   network-monitoring-service:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    depends_on:
+      - db
     ports:
       - "8080:8080"
     environment:
-      - MONITORING_SIMULATION_MODE=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/network_monitoring
+      SPRING_DATASOURCE_USERNAME: network_monitoring
+      SPRING_DATASOURCE_PASSWORD: network_monitoring
+
+volumes:
+  pgdata:
