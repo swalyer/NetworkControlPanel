@@ -1,28 +1,42 @@
 package ru.example.networkmonitoring.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
+@Entity
+@Table(name = "host_check_result")
 public class HostCheckResult {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long hostId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id", nullable = false)
+    private Host host;
+
+    @Column(name = "timestamp", nullable = false)
     private OffsetDateTime timestamp;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private HostStatus status;
+
+    @Column(name = "response_time_millis")
     private Long responseTimeMillis;
-    private String message;
 
-    public HostCheckResult() {
-    }
-
-    public HostCheckResult(Long id, Long hostId, OffsetDateTime timestamp, HostStatus status,
-                           Long responseTimeMillis, String message) {
-        this.id = id;
-        this.hostId = hostId;
-        this.timestamp = timestamp;
-        this.status = status;
-        this.responseTimeMillis = responseTimeMillis;
-        this.message = message;
-    }
+    @Column(name = "error_message")
+    private String errorMessage;
 
     public Long getId() {
         return id;
@@ -32,12 +46,12 @@ public class HostCheckResult {
         this.id = id;
     }
 
-    public Long getHostId() {
-        return hostId;
+    public Host getHost() {
+        return host;
     }
 
-    public void setHostId(Long hostId) {
-        this.hostId = hostId;
+    public void setHost(Host host) {
+        this.host = host;
     }
 
     public OffsetDateTime getTimestamp() {
@@ -64,11 +78,11 @@ public class HostCheckResult {
         this.responseTimeMillis = responseTimeMillis;
     }
 
-    public String getMessage() {
-        return message;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
